@@ -274,7 +274,20 @@ saveVideo({
 
 # In Class work.
 
-## Make a video of mean temperature differences for the full Colorado dataset
+## GGanimate
+
+Make a video showing the correlation between Air Force Academy and Fort Collins
+between the min, mean, and max temps. The movie should cover the full year. 
+
+```{r}
+
+```
+
+
+
+## (Animation package)
+
+Make a video of mean temperature differences for the full Colorado dataset
 (you need to download this [here](https://www.dropbox.com/s/s7zt18elgoh8q2b/DailyP.RData?dl=0)) first.
 
 The video should look similar to the one above, but I want you to choose your own 
