@@ -1,7 +1,7 @@
 ---
 title: "Rain Movies"
 author: "Elaina Passero"
-date: "11/13/2019"
+date: "11/17/2019"
 output: html_document
 ---
 
@@ -343,13 +343,13 @@ basemap2 <- tm_shape(co_counties) +
   tm_dots(co_cities,shape = 5)+
   tm_shape(co_elev) +
     tm_raster(style='cont',
-              palette = 'Greens', # edit this
+              palette = 'Greens',
               title='Elevation (m)') 
 
 # create video
 full_dates <- unique(daily_sf$date)
-#sequence <- 1:length(full_dates)
-sequence <- 1:10
+sequence <- 1:length(full_dates)
+
 
 saveVideo({
   for(i in sequence){
@@ -380,6 +380,6 @@ saveVideo({
 
 
 ```
-Despite my best attempts at downloading and installing 'USAboundariesData', the package would not appear in my library. I ran the script by manually adding the datasets to my project folder and loading to the environment from that folder.
+Despite my best attempts at downloading and installing 'USAboundariesData', the package would not appear in my library. I ran the script by manually adding the datasets to my project folder and loading to the environment from that folder. I added the cities and counties dataset to my repository.
 
-I was unable to create/play the video because I am missing "ffmpeg" (I am in R 3.5.3). I was unable to get the program installed on my computer. Therefore, the script I wrote may not be capable of producing a video.
+I was unable to create/play the video because I am missing "ffmpeg" (I am in R 3.5.1). I was unable to get the program installed on my computer. I never got the videos that you created running properly from the same issue. I tried testing this on my work computer (R 3.6.1), but I got the same error. Therefore, the script I wrote may not be capable of producing a video.
