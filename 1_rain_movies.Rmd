@@ -1,7 +1,7 @@
 ---
 title: "Rain Movies"
-author: "Matthew Ross"
-date: "11/7/2019"
+author: "Elaina Passero"
+date: "11/13/2019"
 output: html_document
 ---
 
@@ -22,7 +22,9 @@ library(lubridate)
 library(ggthemes)
 library(tmap)
 library(sf)
+library(gifski)
 theme_set(theme_few()) # Set ggplot theme
+
 
 
 knitr::opts_chunk$set(echo = TRUE)
@@ -56,7 +58,7 @@ af_p <- riem_measures(station='AFF',date_start = '2018-10-01',
 fc <- riem_measures(station='FNL',date_start = '2018-10-01',
                       date_end = '2019-09-30')
 
-View(fc)
+#View(fc)
 
 ```
 
@@ -198,7 +200,7 @@ saveVideo({
 # A cooler video
 
 ## Let's see if we can see weather fronts by downloading all Colorado data and
-trying to get those to flash
+## trying to get those to flash
 
 
 ```{r,eval=F}
@@ -279,7 +281,32 @@ saveVideo({
 Make a video showing the correlation between Air Force Academy and Fort Collins
 between the min, mean, and max temps. The movie should cover the full year. 
 
-```{r}
+```{r DIY_animate, warning=FALSE}
+# create df
+daily_t <- fc %>% 
+  bind_rows(af_p) %>%
+  mutate(date = as.Date(valid)) %>%
+  group_by(date, station, lon, lat) %>%
+  summarize(mean_temp = mean(tmpf,na.rm=T),
+            min_temp = min(tmpf,na.rm=T),
+            max_temp = max(tmpf,na.rm=T),
+            daily_p = sum(p01i,na.rm=T)) %>%
+  as.data.frame() %>%
+  select(-c(lat,lon,daily_p)) %>%
+  pivot_longer(3:5,names_to = "measure",values_to = "temp") %>%
+  as_tibble()
+
+# create plot
+t1 <- ggplot(daily_t,aes(x=date,y=temp,shape=station,
+                         group=seq_along(temp),color=measure)) + 
+  geom_point(aes(size=1)) +
+  labs(title = '100 mile temp diff - min, max, mean', x='Date',y= 'Temp (f)') + 
+  transition_reveal(date) + 
+  scale_color_few()
+
+# create animation
+animate(t1, nframes=nrow(daily_t))
+
 
 ```
 
@@ -293,7 +320,66 @@ Make a video of mean temperature differences for the full Colorado dataset
 The video should look similar to the one above, but I want you to choose your own 
 style (change the background, add other layers (like counties or cities)), etc...
 
-```{r}
+```{r DIY_video, warning=FALSE}
 load('DailyP.RData')
-```
 
+# get spatial data frame
+daily_sf <- daily_p %>%
+  st_as_sf(.,coords=c('lon','lat'),crs=4326,remove=F)
+  
+# create a basemap - add counties
+load("counties_contemporary_lores.rda")
+co_counties <- counties_contemporary_lores %>%
+  filter(state_abbr == "CO")
+#co_counties <- us_counties(states = "CO")
+
+load("census_cities.rda")
+co_cities <- census_cities %>%
+  filter(state_abbr == "CO")
+#co_cities <- us_cities(states = "CO")
+
+basemap2 <- tm_shape(co_counties) + 
+    tm_polygons() + 
+  tm_dots(co_cities,shape = 5)+
+  tm_shape(co_elev) +
+    tm_raster(style='cont',
+              palette = 'Greens', # edit this
+              title='Elevation (m)') 
+
+# create video
+full_dates <- unique(daily_sf$date)
+#sequence <- 1:length(full_dates)
+sequence <- 1:10
+
+saveVideo({
+  for(i in sequence){
+  sub_sf <- daily_sf %>%
+    filter(date == full_dates[i]) %>%
+    filter(daily_p > 0)
+  
+  if(nrow(sub_sf) > 0){
+  finalmap <- basemap2 + tm_shape(sub_sf) + 
+    tm_dots(title.size='Mean Temperature (F)',
+            col='lon',
+            size='mean_temp',
+            style='cont',
+            palette='Oranges',
+            legend.show = F,
+            size.max=19,
+            scale=3.5,
+            sizes.legend=c(0,1,5,10,20))
+  }else{finalmap <- basemap2}
+  print(finalmap + 
+          tm_layout(title=full_dates[i],
+        legend.position=c(0.7,0.2)))
+  }
+},movie.name = 'mean_temp_diff_all.mp4',
+  interval=0.12,
+  ani.width=1000,
+  ani.height=800)
+
+
+```
+Despite my best attempts at downloading and installing 'USAboundariesData', the package would not appear in my library. I ran the script by manually adding the datasets to my project folder and loading to the environment from that folder.
+
+I was unable to create/play the video because I am missing "ffmpeg" (I am in R 3.5.3). I was unable to get the program installed on my computer. Therefore, the script I wrote may not be capable of producing a video.
