@@ -333,18 +333,14 @@ co_counties <- counties_contemporary_lores %>%
   filter(state_abbr == "CO")
 #co_counties <- us_counties(states = "CO")
 
-load("census_cities.rda")
-co_cities <- census_cities %>%
-  filter(state_abbr == "CO")
-#co_cities <- us_cities(states = "CO")
-
-basemap2 <- tm_shape(co_counties) + 
+basemap2 <- tm_shape(co) + 
     tm_polygons() + 
-  tm_dots(co_cities,shape = 5)+
   tm_shape(co_elev) +
     tm_raster(style='cont',
               palette = 'Greens',
               title='Elevation (m)') 
+county_map <- tm_shape(co_counties)+
+  tm_borders(col="black")
 
 # create video
 full_dates <- unique(daily_sf$date)
@@ -354,20 +350,18 @@ sequence <- 1:length(full_dates)
 saveVideo({
   for(i in sequence){
   sub_sf <- daily_sf %>%
-    filter(date == full_dates[i]) %>%
-    filter(daily_p > 0)
+    filter(date == full_dates[i])
   
   if(nrow(sub_sf) > 0){
-  finalmap <- basemap2 + tm_shape(sub_sf) + 
+  finalmap <- basemap2+ county_map + tm_shape(sub_sf) + 
     tm_dots(title.size='Mean Temperature (F)',
-            col='lon',
-            size='mean_temp',
+            col='mean_temp',
+            size = 0.1,
             style='cont',
-            palette='Oranges',
-            legend.show = F,
-            size.max=19,
-            scale=3.5,
-            sizes.legend=c(0,1,5,10,20))
+            palette='Reds',
+            legend.show = T,
+            scale=3.5)+
+    tm_legend(outside=TRUE)
   }else{finalmap <- basemap2}
   print(finalmap + 
           tm_layout(title=full_dates[i],
@@ -382,4 +376,4 @@ saveVideo({
 ```
 Despite my best attempts at downloading and installing 'USAboundariesData', the package would not appear in my library. I ran the script by manually adding the datasets to my project folder and loading to the environment from that folder. I added the cities and counties dataset to my repository.
 
-I was unable to create/play the video because I am missing "ffmpeg" (I am in R 3.5.1). I was unable to get the program installed on my computer. I never got the videos that you created running properly from the same issue. I tried testing this on my work computer (R 3.6.1), but I got the same error. Therefore, the script I wrote may not be capable of producing a video.
+I was unable to create/play the video because I am missing "ffmpeg" (I am in R 3.5.1). I was unable to get the program installed on my computer. I never got the videos that you created running properly from the same issue. I tried testing this on my work computer (R 3.6.1), but I got the same error. Therefore, the script I wrote wasn't capable of producing a MP4 file. 
