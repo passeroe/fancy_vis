@@ -320,6 +320,11 @@ Make a video of mean temperature differences for the full Colorado dataset
 The video should look similar to the one above, but I want you to choose your own 
 style (change the background, add other layers (like counties or cities)), etc...
 
+Despite my best attempts at downloading and installing 'USAboundariesData', the package would not appear in my library. I ran the script by manually adding the datasets to my project folder and loading to the environment from that folder. I added the cities and counties dataset to my repository.
+
+I was unable to create/play the video because I am missing "ffmpeg" (I am in R 3.5.1). I was unable to get the program installed on my computer. I never got the videos that you created running properly from the same issue. I tried testing this on my work computer (R 3.6.1), but I got the same error. Therefore, I saved the animation as a GIF instead of a MP4.
+
+
 ```{r DIY_video, warning=FALSE}
 load('DailyP.RData')
 
@@ -345,9 +350,10 @@ county_map <- tm_shape(co_counties)+
 # create video
 full_dates <- unique(daily_sf$date)
 sequence <- 1:length(full_dates)
+sequence <- 1:20
 
 
-saveVideo({
+saveGIF({
   for(i in sequence){
   sub_sf <- daily_sf %>%
     filter(date == full_dates[i])
@@ -367,13 +373,10 @@ saveVideo({
           tm_layout(title=full_dates[i],
         legend.position=c(0.7,0.2)))
   }
-},movie.name = 'mean_temp_diff_all.mp4',
+},movie.name = 'mean_temp_diff_all.gif',
   interval=0.12,
   ani.width=1000,
   ani.height=800)
 
 
 ```
-Despite my best attempts at downloading and installing 'USAboundariesData', the package would not appear in my library. I ran the script by manually adding the datasets to my project folder and loading to the environment from that folder. I added the cities and counties dataset to my repository.
-
-I was unable to create/play the video because I am missing "ffmpeg" (I am in R 3.5.1). I was unable to get the program installed on my computer. I never got the videos that you created running properly from the same issue. I tried testing this on my work computer (R 3.6.1), but I got the same error. Therefore, the script I wrote wasn't capable of producing a MP4 file. 
