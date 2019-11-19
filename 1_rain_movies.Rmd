@@ -304,6 +304,7 @@ t1 <- ggplot(daily_t,aes(x=date,y=temp,shape=station,
   transition_reveal(date) + 
   scale_color_few()
 
+
 # create animation
 animate(t1, nframes=nrow(daily_t))
 
@@ -350,7 +351,6 @@ county_map <- tm_shape(co_counties)+
 # create video
 full_dates <- unique(daily_sf$date)
 sequence <- 1:length(full_dates)
-sequence <- 1:20
 
 
 saveGIF({
